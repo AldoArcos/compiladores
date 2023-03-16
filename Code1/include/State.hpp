@@ -2,7 +2,7 @@
 #define STATE_H
 
 #include "Transition.hpp"
-#include <list>
+#include <vector>
 class Transition;
 
 class State {
@@ -10,18 +10,21 @@ class State {
         bool accepted;
         int id;
         int token;
-        std::list<Transition> trans;
+        std::vector<Transition> trans;
 
     public:
         inline static int cntId = 0;
 
         State() : id(cntId++), accepted(false), token(-1) {}
+        State(int len) : id(cntId++), accepted(false), token(-1) {
+            trans.resize(len);
+        }
 
         int getId() {
             return id;
         }
 
-        std::list<Transition> & getTransitions() {
+        std::vector<Transition> & getTransitions() {
             return trans;
         }
 
@@ -31,6 +34,18 @@ class State {
 
         void setAccepted(bool _accepted) {
             accepted = _accepted;
+        }
+
+        void setTransition(int id, Transition t) {
+            trans[id] = t;
+        }
+
+        bool isAccepted() {
+            return accepted;
+        }
+
+        void setToken(int _token) {
+            token = _token;
         }
 };
 #endif

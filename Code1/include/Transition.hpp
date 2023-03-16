@@ -5,20 +5,26 @@ class State;
 
 class Transition {
     private:
-        char simb;
+        char left_simb;
+        char right_simb;
         State * s;
 
     public:
-        Transition(char _simb, State * _s) : simb(_simb), s(_s) {}
-        Transition() : simb(-1), s(nullptr) {}
+        Transition(char _simb, State * _s) : left_simb(_simb), right_simb(_simb), s(_s) {}
+        Transition(char _left_simb, char _right_simb, State * _s) : left_simb(_left_simb), right_simb(_right_simb), s(_s) {}
+        Transition() : right_simb(-1), left_simb(-1), s(nullptr) {}
         ~Transition() {}
 
         State * getState() {
             return s;
         }
 
-        char getSymbol() {
-            return simb;
+        char getLeft_simb() {
+            return left_simb;
+        }
+
+        bool isValid(char x) {
+            return (left_simb <= x && x <= right_simb);
         }
 };
 
