@@ -42,7 +42,7 @@ class NFA {
         void Concatenation(NFA * n);
         void Kleene_star();
         void Positive_closure();
-        std::set<int> Epsilon_closure(const std::set<int> & initial_states, bool & flag);
+        std::map<int, State*> Epsilon_closure(const std::map<int, State*> & initial_states, bool & flag);
         DFA * getDFA();
         void setToken(int token);
         int getId() {

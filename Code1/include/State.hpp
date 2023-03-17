@@ -1,30 +1,28 @@
 #ifndef STATE_H
 #define STATE_H
-
 #include "Transition.hpp"
-#include <vector>
+#include <list>
 class Transition;
+class NFA;
 
 class State {
+    friend class NFA;
     private:
         bool accepted;
         int id;
         int token;
-        std::vector<Transition> trans;
+        std::list<Transition> trans;
 
     public:
         inline static int cntId = 0;
 
         State() : id(cntId++), accepted(false), token(-1) {}
-        State(int len) : id(cntId++), accepted(false), token(-1) {
-            trans.resize(len);
-        }
 
         int getId() {
             return id;
         }
 
-        std::vector<Transition> & getTransitions() {
+        std::list<Transition> & getTransitions() {
             return trans;
         }
 
@@ -34,10 +32,6 @@ class State {
 
         void setAccepted(bool _accepted) {
             accepted = _accepted;
-        }
-
-        void setTransition(int id, Transition t) {
-            trans[id] = t;
         }
 
         bool isAccepted() {
