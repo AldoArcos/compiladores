@@ -89,6 +89,7 @@ int main() {
             cout << "Id: ";
             cin >> id;
             DFA * dfa = all_NFA[id]->getDFA();
+            dfa->print();
         }
     }
 

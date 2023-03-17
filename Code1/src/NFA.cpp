@@ -86,23 +86,25 @@ void NFA::Positive_closure()
     final_state = y;
 }
 
-std::set<int> NFA::Epsilon_closure(const std::set<int> & initial_states, bool & flag) {
-    std::queue<int> q; 
-    std::set<int> visited; // Id de estados visitados
-    for(int idState : initial_states) {
-        q.push(idState);
-        visited.insert(idState);
+std::map<int, State*> NFA::Epsilon_closure(const std::map<int, State*> & initial_states, bool & flag) {
+
+    std::queue<State*> q; 
+    std::map<int,State*> visited;
+
+    for(auto[id, s] : initial_states) {
+        visited.insert({id, s});
+        q.push(s);
     }
 
     while(!q.empty()) {
-        int id = q.front();
+        State * s = q.front();
         q.pop();
-        State * s = states[id];
-        if(s->isAccepted()) flag = 1;
+        if(s->isAccepted()) flag = 1; // El estado generado tiene un estado final.
+
         for(Transition t : s->getTransitions()) {
-            if(t.isValid(EPSILON) && visited.find(t.getState()->getId()) == visited.end()) {
-                visited.insert(t.getState()->getId());
-                q.push(t.getState()->getId());
+            if(t.isValid(EPSILON) && visited.count(t.getState()->getId()) == 0) {
+                visited.insert({t.getState()->getId(), t.getState()});
+                q.push(t.getState());
             }
         }
     }
@@ -111,69 +113,106 @@ std::set<int> NFA::Epsilon_closure(const std::set<int> & initial_states, bool & 
 
 DFA *  NFA::getDFA()
 {
-    std::set<int> initial_states;
-    initial_states.insert(initial_state->getId());
+    std::map<int, State*> initial_states;
+    initial_states.insert({initial_state->id, initial_state});
 
     bool flag = false;
-    std::set<int> reachable_states = Epsilon_closure(initial_states,flag);
+    std::map<int, State*> ans = Epsilon_closure(initial_states,flag);
 
     // Lista de los estados que vayamos generando
-    std::list<SetStates*> st;  
+    std::map<int,SetStates*> st;  
+    std::queue<SetStates*> q;
 
-    SetStates * initial_dfa_state = new SetStates(initial_states, reachable_states, flag);
-    st.push_back(initial_dfa_state);
+    int cntStates = 0;
+    SetStates * initial_dfa_state = new SetStates(ans, flag);
+
+    st.insert({cntStates++, initial_dfa_state});
+    q.push(initial_dfa_state);
     
 
-    for(SetStates * s : st) {
+    while(!q.empty()) {
+
+        SetStates * s = q.front();
+        q.pop();
+
+        s->print();
         
+
         // Iteramos por cada simbolo del alfabeto
         for(char symbol : alphabet) {
-            
+
+            std::cout << symbol << ":\n";
             flag = false;
             initial_states.clear();
-            reachable_states.clear();
+            ans.clear();
 
             // Vemos a que estados podemos llegar con el actual simbolo
-            for(int id : s->getAll_ids()) {
-                for(Transition t : states[id]->getTransitions()) {
+            for(auto [id, x] : s->states) {
+
+                for(Transition t : x->trans) {
+
+                    if(t.getState() == nullptr) continue;
+
                     if(t.isValid(symbol)) {
                         // Si existe una transicion con el simbolo
-                        initial_states.insert(id);
+                        initial_states.insert({t.getState()->getId(), t.getState()});
                     }
+
                 }
+
             }
 
             // Creamos un nuevo estado
-            reachable_states = Epsilon_closure(initial_states, flag);
+            ans = Epsilon_closure(initial_states, flag);
 
-            if(!reachable_states.empty()) {
+            std::cout << "Estados a los que podemos llegar = ";
+            for(auto [id, s] : ans) std::cout << id << " ";
+            std::cout << '\n';
+
+            if(!ans.empty()) {
 
                 bool flag_new_state = 1;
 
-                for(SetStates * aux : st) {
-                    if(*aux == *s) {
+                // Verificamos que ese estado no exista
+
+                for(auto[id, x] : st) {
+
+                    if(x->states == ans) {
                         // Ya existe un estado con esos estados iniciales
                         flag_new_state = 0;
-                        s->setTransition(symbol, Transition(symbol, aux));
+
+                        // Creamos la transicion
+                        s->transitions[symbol] = id;
+
                         break;
                     }
+
                 }
 
                 // Sino existe ningun estado con esos estados iniciales
                 if(flag_new_state) {
-                    SetStates *aux = new SetStates(initial_states, reachable_states, flag);
-                    s->setTransition(symbol, Transition(symbol, aux));
-                    st.push_back(aux);
+
+                    SetStates *aux = new SetStates(ans, flag);
+
+                    s->transitions[symbol] = cntStates;
+
+                    st.insert({cntStates++, aux});
+
+                    q.push(aux);
+
                 }
+
             }
+
         }
     }
-    std::map<int, State*> dfa_states;
-    for(SetStates * s : st) {
-        dfa_states.insert({s->getId(), s});
-    }
+    
 
-    DFA * dfa = new DFA(initial_dfa_state, dfa_states, alphabet);
+    DFA * dfa = new DFA(alphabet, cntStates);
+    for(auto [i, s] : st) {
+        for(auto [j, id] : s->transitions) 
+            dfa->trans[i][j] = id;
+    }
     return dfa;
 }
 
