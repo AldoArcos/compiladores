@@ -35,6 +35,7 @@ class NFA {
             initial_state = x;
             final_state = y;
         }
+        NFA(std::list<NFA*> n);
 
         ~NFA(){}
 
@@ -42,6 +43,7 @@ class NFA {
         void Concatenation(NFA * n);
         void Kleene_star();
         void Positive_closure();
+        void Optional();
         std::map<int, State*> Epsilon_closure(const std::map<int, State*> & initial_states, bool & flag);
         DFA * getDFA();
         void setToken(int token);
