@@ -16,8 +16,9 @@ int main() {
         cout << "3. NFA concatenation" << nl;
         cout << "4. NFA kleen closure" << nl;
         cout << "5. NFA positive closure" << nl;
-        cout << "6. NFA print" << nl;
-        cout << "7. NFA to DFA" << nl;
+        cout << "6. NFA optional" << nl;
+        cout << "7. NFA print" << nl;
+        cout << "8. NFA to DFA" << nl;
         cin >> opt;
         cout << "\n\n";
         if(opt == 0) {
@@ -77,18 +78,34 @@ int main() {
             all_NFA[id]->Positive_closure();
         }
         else if(opt == 6) {
+            cout << "*** NFA optional ***" << nl;
+            int id;
+            cout << "Id: ";
+            cin >> id;
+            all_NFA[id]->Optional();
+        }
+        else if(opt == 7) {
             cout << "*** NFA print ***" << nl;
             int id;
             cout << "Id: ";
             cin >> id;
             all_NFA[id]->print();
         }
-        else if(opt == 7) {
+        else if(opt == 8) {
             cout << "*** NFA to DFA ***" << nl;
+            cout << "Total: " << nl;
+            int cnt;
             int id;
-            cout << "Id: ";
-            cin >> id;
-            DFA * dfa = all_NFA[id]->getDFA();
+            cin >> cnt;
+            std::list<NFA*> l;
+            for(int i=0; i<cnt; i++) {
+                cout << "Id: ";
+                cin >> id;
+                l.push_back(all_NFA[id]);
+                all_NFA.erase(id);
+            }
+            NFA * n = new NFA(l);
+            DFA * dfa = n->getDFA();
             dfa->print();
         }
     }

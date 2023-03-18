@@ -86,6 +86,26 @@ void NFA::Positive_closure()
     final_state = y;
 }
 
+void NFA::Optional() 
+{
+    State * x = new State();
+    State * y = new State();
+
+    states.insert({x->getId(), x});
+    states.insert({y->getId(), y});
+
+    y->setAccepted(true);
+    final_state->setAccepted(false);
+
+    final_state->addTransition(Transition(EPSILON, y));
+
+    x->addTransition(Transition(EPSILON, initial_state));
+    x->addTransition(Transition(EPSILON, y));
+
+    initial_state = x;
+    final_state = y;
+}
+
 std::map<int, State*> NFA::Epsilon_closure(const std::map<int, State*> & initial_states, bool & flag) {
 
     std::queue<State*> q; 
@@ -214,6 +234,18 @@ DFA *  NFA::getDFA()
             dfa->trans[i][j] = id;
     }
     return dfa;
+}
+
+NFA::NFA(std::list<NFA*> n) {
+    State * x = new State();
+    for(auto y : n) {
+        x->addTransition(Transition(EPSILON, y->initial_state));
+        alphabet.merge(y->alphabet);
+        states.merge(y->states);
+        y->initial_state->accepted = false;
+    }
+    initial_state = x;
+    return;
 }
 
 void NFA::setToken(int token) {
