@@ -2,40 +2,39 @@
 #define STATE_H
 #include "Transition.hpp"
 #include <list>
+#ifndef NO_TOKEN
+#define NO_TOKEN -1
+#endif
 class Transition;
 class NFA;
 
 class State {
     friend class NFA;
     private:
-        bool accepted;
+        bool isAccepted;
         int id;
         int token;
-        std::list<Transition> trans;
+        std::list<Transition> transitions;
 
     public:
         inline static int cntId = 0;
 
-        State() : id(cntId++), accepted(false), token(-1) {}
+        State() : id(cntId++), isAccepted(false), token(NO_TOKEN) {}
 
         int getId() {
             return id;
         }
 
         std::list<Transition> & getTransitions() {
-            return trans;
+            return transitions;
         }
 
         void addTransition(Transition t) {
-            trans.push_back(t);
+            transitions.push_back(t);
         }
 
         void setAccepted(bool _accepted) {
-            accepted = _accepted;
-        }
-
-        bool isAccepted() {
-            return accepted;
+            isAccepted = _accepted;
         }
 
         void setToken(int _token) {

@@ -11,12 +11,17 @@ class SetStates {
 
     friend class NFA;
     private:
+        // Estados del NFA
         std::map<int, State*> states;
+        // Simbol y numero del SetState
         std::map<int, int> transitions;
-        bool accepted;
+        // Es final
+        bool isAccepted;
+
+        int token;
         
     public:
-        SetStates(std::map<int, State*> _states, bool _flag) : states(_states), accepted(_flag) {}
+        SetStates(std::map<int, State*> _states, bool _flag, int _token) : states(_states), isAccepted(_flag), token(_token) {}
 
         void print() {
             std::cout << "Estado conjunto = {";

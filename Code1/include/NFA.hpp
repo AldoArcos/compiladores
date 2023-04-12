@@ -1,3 +1,5 @@
+#ifndef NFA_H
+#define NFA_H
 #include "State.hpp"
 #include "SetStates.hpp"
 #include "DFA.hpp"
@@ -19,58 +21,22 @@ class NFA {
         std::map<int, State*> states;
     
     public:
-        NFA () : initial_state(nullptr), final_state(nullptr), id(cntIdNFA++) {}
-
-        NFA(char symbol) : id(cntIdNFA++) {
-            State * x = new State();
-            State * y = new State();
-            y->setAccepted(true);
-
-            states.insert({x->getId(), x});
-            states.insert({y->getId(), y});
-
-            alphabet.insert(symbol);
-            x->addTransition(Transition(symbol, y));
-
-            initial_state = x;
-            final_state = y;
-        }
+        NFA () : initial_state((State*) nullptr), final_state((State*) nullptr), id(cntIdNFA++) {}
+        NFA(char s1, char s2);
         NFA(std::list<NFA*> n);
-
-        ~NFA(){}
+        ~NFA();
 
         void Union(NFA * n);
         void Concatenation(NFA * n);
         void Kleene_star();
         void Positive_closure();
         void Optional();
-        std::map<int, State*> Epsilon_closure(const std::map<int, State*> & initial_states, bool & flag);
+        std::map<int, State*> Epsilon_closure(const std::map<int, State*> &initial_states, bool &containsFinalState, int &token);
         DFA * getDFA();
         void setToken(int token);
         int getId() {
             return id;
         }
-        void print() {
-            std::cout << "\n\n";
-            std::queue<State*> q;
-            q.push(initial_state);
-            std::set<int> visited;
-            visited.insert(initial_state->getId());
-            while (!q.empty()) {
-                State * s = q.front();
-                q.pop();
-                std::cout << "---> Estado: " << s->getId() << "\n";
-                std::cout << "\tTransiciones:\n";
-                for(Transition t : s->getTransitions()) {
-                    std::cout << "\t\tid: " << t.getState()->getId() << "   " << "simbolo: ";
-                    if(t.getLeft_simb() == 0) std::cout << "EPS\n";
-                    else std::cout << t.getLeft_simb() << "\n";
-                    if(visited.find(t.getState()->getId()) == visited.end()) {
-                        q.push(t.getState());
-                        visited.insert(t.getState()->getId());
-                    }
-                }
-            }
-            std::cout << "\n";
-        }
+        void print();
 };
+#endif
