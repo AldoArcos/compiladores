@@ -1,0 +1,4 @@
+E => T Ep;
+Ep => + T Ep | - T Ep | EPSILON;
+T => * F Tp | / F Tp | EPSILON;
+F => ( E ) | num;
